@@ -1,0 +1,903 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>color_scale_with_belt</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-06-26"><meta name="DC.source" content="color_scale_with_belt.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Show colors as balls in CIELAB with a belt</a></li><li><a href="#3">Create animated GIF</a></li><li><a href="#5">3D plot</a></li><li><a href="#6">Show color patches using balls</a></li><li><a href="#7">Show color patches using lines</a></li><li><a href="#8">Calculate dE between all colors in CIELAB</a></li><li><a href="#9">Calculate dE between two colors in CIELAB</a></li></ul></div><h2 id="1">Show colors as balls in CIELAB with a belt</h2><pre>Generate dE for all pairs</pre><pre>Q: show the color gamut boundaries
+Q: visualize the color scale proposed by IEC MT41</pre><pre class="codeinput"><span class="keyword">function</span> color_scale_with_belt
+</pre><pre class="codeinput"><span class="comment">% prepare the RGB points</span>
+rgb = prep_rgb_max_chroma;
+lab = rgb2lab(rgb/255);
+
+<span class="comment">% prepare the RGB points</span>
+rgb_original = prep_rgb_sample_original;
+lab_original = rgb2lab(rgb_original/255);
+
+<span class="comment">% save data</span>
+rgblab = [rgb lab];
+<span class="comment">% save('rgblab','rgblab')</span>
+
+
+<span class="comment">% xlswrite('rgblab.xlsx',rgblab)</span>
+
+<span class="comment">% xlswrite('dE.xlsx',dE_allpair)</span>
+
+<span class="comment">% 3D plot</span>
+fg = figure(<span class="string">'Units'</span>,<span class="string">'inches'</span>,<span class="string">'Position'</span>,[2 2 8 8]);
+
+hold <span class="string">on</span>
+
+show_as_lines(lab,rgb)
+snapnow
+
+show_as_balls(lab_original,rgb_original)
+snapnow
+
+<span class="comment">% add the Lightness axis</span>
+quiver3(0,0,0,0,0,100,0,<span class="string">'k'</span>)
+
+grid <span class="string">on</span>
+
+xlabel(<span class="string">'CIELAB a*'</span>)
+ylabel(<span class="string">'CIELAB b*'</span>)
+zlabel(<span class="string">'CIELAB L*'</span>)
+
+ax = gca;
+
+<span class="comment">% set the background</span>
+ax.Color = [1 1 1]*0.85;
+
+view(-25,15)
+drawnow
+
+saveas(gcf,<span class="string">'t1.png'</span>)
+
+view(0,90)
+drawnow
+saveas(gcf,<span class="string">'t2.png'</span>)
+
+view(0,0)
+drawnow
+saveas(gcf,<span class="string">'t3.png'</span>)
+
+<span class="comment">% create the animated GIF</span>
+create_animation
+
+<span class="keyword">return</span>
+
+
+<span class="comment">% analyze dE</span>
+n = size(c,1);
+dE_array = zeros(n,1);
+
+<span class="keyword">for</span> i=1:n-1
+    lab1 = lab(i,:);
+    lab2 = lab(i+1,:);
+    dE_array(i,1) = color_difference(lab1,lab2);
+<span class="keyword">end</span>
+
+
+dE_sum = zeros(n,1);
+t_sum = 0;
+<span class="keyword">for</span> i=1:n-1
+    t_sum = t_sum + dE_array(i,1);
+    dE_sum(i,1) = t_sum;
+<span class="keyword">end</span>
+
+<span class="comment">% find steps</span>
+sol_rgb = zeros(6,3);
+sol(1) = 1;
+dE_step = 90;
+
+<span class="keyword">for</span> i = 2:6
+    t_de = -1;
+    t1 = sol(i-1);
+    t2 = t1;
+    <span class="keyword">while</span> t_de &lt; dE_step
+        t2 = t2+1;
+        t_de = color_difference(lab(t1,:),lab(t2,:));
+    <span class="keyword">end</span>
+    [t1 t2]
+    color_difference(lab(t1,:),lab(t2,:))
+    sol(i) = t2;
+    sol_rgb(i,:) = c(t2,:);
+<span class="keyword">end</span>
+
+save(<span class="string">'dE_array'</span>,<span class="string">'dE_array'</span>,<span class="string">'dE_sum'</span>,<span class="string">'c'</span>,<span class="string">'sol'</span>,<span class="string">'sol_rgb'</span>)
+</pre><h2 id="3">Create animated GIF</h2><pre class="codeinput">    <span class="keyword">function</span> create_animation
+
+        axis <span class="string">vis3d</span>
+
+        filename = <span class="string">'color_scale_in_CIELAB.gif'</span>
+
+        <span class="comment">% spin the camera</span>
+        <span class="keyword">for</span> n = 1:360/10
+
+            camorbit(10,0,<span class="string">'data'</span>,[0 0 1])
+
+            <span class="comment">% Capture the plot as an image</span>
+            frame = getframe(gcf);
+            im = frame2im(frame);
+            [imind,cm] = rgb2ind(im,256);
+
+            <span class="comment">% Write frames to the GIF File</span>
+            <span class="keyword">if</span> n == 1
+                imwrite(imind,cm,filename,<span class="string">'gif'</span>, <span class="string">'Loopcount'</span>,inf);
+            <span class="keyword">else</span>
+                imwrite(imind,cm,filename,<span class="string">'gif'</span>,<span class="string">'WriteMode'</span>,<span class="string">'append'</span>);
+            <span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+</pre><pre class="codeinput"><span class="keyword">end</span>
+
+
+
+<span class="keyword">function</span> rgb = prep_rgb_sample_original
+<span class="comment">% these are the original proposed color scale</span>
+rgb = [0 0 0;
+    096 000 080;
+    096 096 176;
+    080 192 080;
+    224 224 080;
+    208 144 000;
+    255 0 0;
+    255 255 255
+    ];
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rgb = prep_rgb_sample
+<span class="comment">% generate data points for constructing the 3D color gamut volume</span>
+
+<span class="comment">% the grid</span>
+interval_step = 15;
+interval = 0:interval_step:255-interval_step;
+interval_rev = 255:-interval_step:0+interval_step;
+
+<span class="comment">% the output data as an kx3 matrix</span>
+c = zeros(255/15,3);
+
+<span class="comment">% the length of the output data</span>
+k = 0;
+
+<span class="keyword">if</span> 0
+    <span class="comment">% the gray ramp</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [i i i];
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% largest chroma</span>
+
+<span class="comment">% from red to yellow</span>
+<span class="keyword">for</span> i = interval
+    k = k + 1;
+    c(k,:) = [255 i 0];
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> 1
+    <span class="comment">% from yellow to green</span>
+    <span class="keyword">for</span> i = interval_rev
+        k = k + 1;
+        c(k,:) = [i 255 0];
+    <span class="keyword">end</span>
+
+    <span class="comment">% from green to cyan</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [0 255 i];
+    <span class="keyword">end</span>
+
+    <span class="comment">% from cyan to blue</span>
+    <span class="keyword">for</span> i = interval_rev
+        k = k + 1;
+        c(k,:) = [0 i 255];
+    <span class="keyword">end</span>
+
+    <span class="comment">% from blue to magenta</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [i 0 255];
+    <span class="keyword">end</span>
+
+    <span class="comment">% from magenta to red</span>
+    <span class="keyword">for</span> i = interval_rev
+        k = k + 1;
+        c(k,:) = [255 0 i];
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> 1
+
+    <span class="comment">% red</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [i 0 0];
+    <span class="keyword">end</span>
+
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [255 i i];
+    <span class="keyword">end</span>
+
+    <span class="comment">% green</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [0 i 0];
+    <span class="keyword">end</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [i 255 i];
+    <span class="keyword">end</span>
+
+    <span class="comment">% blue</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [0 0 i];
+    <span class="keyword">end</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [i i 255];
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> 0
+    <span class="comment">% yellow</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [i i 0];
+    <span class="keyword">end</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [255 255 i];
+    <span class="keyword">end</span>
+
+    <span class="comment">% cyan</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [0 i i];
+    <span class="keyword">end</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [i 255 255];
+    <span class="keyword">end</span>
+
+    <span class="comment">% magenta</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [i 0 i];
+    <span class="keyword">end</span>
+    <span class="keyword">for</span> i = interval
+        k = k + 1;
+        c(k,:) = [255 i 255];
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+rgb = c;
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rgb = prep_rgb_max_chroma
+<span class="comment">% largest chroma</span>
+interval_step = 15;
+interval = 0:interval_step:255-interval_step;
+interval_rev = 255:-interval_step:0+interval_step;
+
+c = zeros(255/15,3);
+k = 0;
+
+<span class="keyword">for</span> i = interval
+    k = k + 1;
+    c(k,:) = [255 i 0];
+<span class="keyword">end</span>
+<span class="keyword">for</span> i = interval_rev
+    k = k + 1;
+    c(k,:) = [i 255 0];
+<span class="keyword">end</span>
+<span class="keyword">for</span> i = interval
+    k = k + 1;
+    c(k,:) = [0 255 i];
+<span class="keyword">end</span>
+<span class="keyword">for</span> i = interval_rev
+    k = k + 1;
+    c(k,:) = [0 i 255];
+<span class="keyword">end</span>
+<span class="keyword">for</span> i = interval
+    k = k + 1;
+    c(k,:) = [i 0 255];
+<span class="keyword">end</span>
+<span class="keyword">for</span> i = interval_rev
+    k = k + 1;
+    c(k,:) = [255 0 i];
+<span class="keyword">end</span>
+
+rgb = c;
+
+<span class="keyword">end</span>
+</pre><h2 id="5">3D plot</h2><pre class="codeinput"><span class="keyword">function</span> plot_color_scale (lab)
+
+<span class="comment">% convert to sRGB</span>
+rgb = lab2rgb(lab);
+
+<span class="comment">% cropping -- flooring</span>
+rgb = max(rgb,0);
+
+<span class="comment">% cropping -- ceiling</span>
+rgb = min(rgb,1);
+
+<span class="comment">% scale to [0,255]</span>
+rgb = (double(rgb)*255);
+
+<span class="comment">% start plotting</span>
+hold <span class="string">on</span>
+
+<span class="comment">%         for k = 1:size(lab,1)</span>
+<span class="comment">%             plot3(lab(k,2),lab(k,3),lab(k,1),'o',...</span>
+<span class="comment">%                 'MarkerFaceColor',rgb(k,:)/255,...</span>
+<span class="comment">%                 'MarkerEdgeColor',[0 0 0],...</span>
+<span class="comment">%                 'MarkerSize',5)</span>
+
+
+show_max_chroma(lab,rgb)
+
+grid <span class="string">on</span>
+
+<span class="comment">%axis([-100 100 -100 100 0 100])</span>
+<span class="comment">% axis square</span>
+xlabel(<span class="string">'CIELAB a*'</span>)
+ylabel(<span class="string">'CIELAB b*'</span>)
+zlabel(<span class="string">'CIELAB L*'</span>)
+
+<span class="comment">%saveas(gcf,'t3.png')</span>
+
+<span class="keyword">end</span>
+</pre><h2 id="6">Show color patches using balls</h2><p>lab: input as CIELAB rgb: for coloring</p><pre class="codeinput"><span class="keyword">function</span> show_as_balls (lab,rgb)
+<span class="comment">% show balls</span>
+<span class="keyword">for</span> k = 1:size(lab,1)
+
+    plot3(lab(k,2),lab(k,3),lab(k,1),<span class="string">'o'</span>,<span class="keyword">...</span>
+        <span class="string">'MarkerFaceColor'</span>,rgb(k,:)/255,<span class="keyword">...</span>
+        <span class="string">'MarkerEdgeColor'</span>,rgb(k,:)/255,<span class="keyword">...</span>
+        <span class="string">'MarkerSize'</span>,15)
+
+    <span class="keyword">if</span> 1
+        <span class="comment">% add text labels</span>
+        step = k-1;
+        txt = sprintf(<span class="string">'#%d'</span>,step);
+        text(lab(k,2)+10,lab(k,3),lab(k,1),txt)
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="color_scale_with_belt_02.png" alt=""> <pre class="codeoutput">
+filename =
+
+    'color_scale_in_CIELAB.gif'
+
+</pre><img vspace="5" hspace="5" src="color_scale_with_belt_03.png" alt=""> <h2 id="7">Show color patches using lines</h2><p>lab: input as CIELAB rgb: for coloring</p><pre class="codeinput"><span class="keyword">function</span> show_as_lines (lab,rgb)
+
+<span class="comment">% for each line interval</span>
+<span class="keyword">for</span> k = 1:size(lab,1)-1
+
+    plot3(lab(k:k+1,2),lab(k:k+1,3),lab(k:k+1,1),<span class="string">'-'</span>,<span class="keyword">...</span>
+        <span class="string">'Color'</span>,rgb(k,:)/255)
+
+<span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="color_scale_with_belt_01.png" alt=""> <h2 id="8">Calculate dE between all colors in CIELAB</h2><p>lab is a K*3 matrix</p><pre class="codeinput"><span class="keyword">function</span> dE_allpair = dE_all (lab)
+
+len = size(lab,1);
+dE_allpair = zeros(len,len);
+<span class="keyword">for</span> k = 1:len
+    <span class="keyword">for</span> j = 1:len
+        lab1 = lab(k,:);
+        lab2 = lab(j,:);
+        dE = sum((lab1-lab2).^2).^0.5;
+        dE_allpair(k,j) = dE;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><h2 id="9">Calculate dE between two colors in CIELAB</h2><pre class="codeinput"><span class="keyword">function</span> dE = color_difference (lab1, lab2)
+
+dE = sum((lab1-lab2).^2).^0.5;
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Show colors as balls in CIELAB with a belt
+%  Generate dE for all pairs
+%
+%  Q: show the color gamut boundaries
+%  Q: visualize the color scale proposed by IEC MT41
+%
+function color_scale_with_belt
+
+% prepare the RGB points
+rgb = prep_rgb_max_chroma;
+lab = rgb2lab(rgb/255);
+
+% prepare the RGB points
+rgb_original = prep_rgb_sample_original;
+lab_original = rgb2lab(rgb_original/255);
+
+% save data
+rgblab = [rgb lab];
+% save('rgblab','rgblab')
+
+
+% xlswrite('rgblab.xlsx',rgblab)
+
+% xlswrite('dE.xlsx',dE_allpair)
+
+% 3D plot
+fg = figure('Units','inches','Position',[2 2 8 8]);
+
+hold on
+
+show_as_lines(lab,rgb)
+snapnow
+
+show_as_balls(lab_original,rgb_original)
+snapnow
+
+% add the Lightness axis
+quiver3(0,0,0,0,0,100,0,'k')
+
+grid on
+
+xlabel('CIELAB a*')
+ylabel('CIELAB b*')
+zlabel('CIELAB L*')
+
+ax = gca;
+
+% set the background
+ax.Color = [1 1 1]*0.85;
+
+view(-25,15)
+drawnow
+
+saveas(gcf,'t1.png')
+
+view(0,90)
+drawnow
+saveas(gcf,'t2.png')
+
+view(0,0)
+drawnow
+saveas(gcf,'t3.png')
+
+% create the animated GIF
+create_animation
+
+return
+
+
+% analyze dE
+n = size(c,1);
+dE_array = zeros(n,1);
+
+for i=1:n-1
+    lab1 = lab(i,:);
+    lab2 = lab(i+1,:);
+    dE_array(i,1) = color_difference(lab1,lab2);
+end
+
+
+dE_sum = zeros(n,1);
+t_sum = 0;
+for i=1:n-1
+    t_sum = t_sum + dE_array(i,1);
+    dE_sum(i,1) = t_sum;
+end
+
+% find steps
+sol_rgb = zeros(6,3);
+sol(1) = 1;
+dE_step = 90;
+
+for i = 2:6
+    t_de = -1;
+    t1 = sol(i-1);
+    t2 = t1;
+    while t_de < dE_step
+        t2 = t2+1;
+        t_de = color_difference(lab(t1,:),lab(t2,:));
+    end
+    [t1 t2]
+    color_difference(lab(t1,:),lab(t2,:))
+    sol(i) = t2;
+    sol_rgb(i,:) = c(t2,:);
+end
+
+save('dE_array','dE_array','dE_sum','c','sol','sol_rgb')
+
+%% Create animated GIF
+    function create_animation
+        
+        axis vis3d
+        
+        filename = 'color_scale_in_CIELAB.gif'
+        
+        % spin the camera
+        for n = 1:360/10
+            
+            camorbit(10,0,'data',[0 0 1])
+            
+            % Capture the plot as an image
+            frame = getframe(gcf);
+            im = frame2im(frame);
+            [imind,cm] = rgb2ind(im,256);
+            
+            % Write frames to the GIF File
+            if n == 1
+                imwrite(imind,cm,filename,'gif', 'Loopcount',inf);
+            else
+                imwrite(imind,cm,filename,'gif','WriteMode','append');
+            end
+            
+        end
+        
+    end
+
+
+end
+
+
+
+function rgb = prep_rgb_sample_original
+% these are the original proposed color scale
+rgb = [0 0 0;
+    096 000 080;
+    096 096 176;
+    080 192 080;
+    224 224 080;
+    208 144 000;
+    255 0 0;
+    255 255 255
+    ];
+end
+
+function rgb = prep_rgb_sample
+% generate data points for constructing the 3D color gamut volume
+
+% the grid
+interval_step = 15;
+interval = 0:interval_step:255-interval_step;
+interval_rev = 255:-interval_step:0+interval_step;
+
+% the output data as an kx3 matrix
+c = zeros(255/15,3);
+
+% the length of the output data
+k = 0;
+
+if 0
+    % the gray ramp
+    for i = interval
+        k = k + 1;
+        c(k,:) = [i i i];
+    end
+end
+
+% largest chroma
+
+% from red to yellow
+for i = interval
+    k = k + 1;
+    c(k,:) = [255 i 0];
+end
+
+if 1
+    % from yellow to green
+    for i = interval_rev
+        k = k + 1;
+        c(k,:) = [i 255 0];
+    end
+    
+    % from green to cyan
+    for i = interval
+        k = k + 1;
+        c(k,:) = [0 255 i];
+    end
+    
+    % from cyan to blue
+    for i = interval_rev
+        k = k + 1;
+        c(k,:) = [0 i 255];
+    end
+    
+    % from blue to magenta
+    for i = interval
+        k = k + 1;
+        c(k,:) = [i 0 255];
+    end
+    
+    % from magenta to red
+    for i = interval_rev
+        k = k + 1;
+        c(k,:) = [255 0 i];
+    end
+end
+
+if 1
+    
+    % red
+    for i = interval
+        k = k + 1;
+        c(k,:) = [i 0 0];
+    end
+    
+    for i = interval
+        k = k + 1;
+        c(k,:) = [255 i i];
+    end
+    
+    % green
+    for i = interval
+        k = k + 1;
+        c(k,:) = [0 i 0];
+    end
+    for i = interval
+        k = k + 1;
+        c(k,:) = [i 255 i];
+    end
+    
+    % blue
+    for i = interval
+        k = k + 1;
+        c(k,:) = [0 0 i];
+    end
+    for i = interval
+        k = k + 1;
+        c(k,:) = [i i 255];
+    end
+end
+
+if 0
+    % yellow
+    for i = interval
+        k = k + 1;
+        c(k,:) = [i i 0];
+    end
+    for i = interval
+        k = k + 1;
+        c(k,:) = [255 255 i];
+    end
+    
+    % cyan
+    for i = interval
+        k = k + 1;
+        c(k,:) = [0 i i];
+    end
+    for i = interval
+        k = k + 1;
+        c(k,:) = [i 255 255];
+    end
+    
+    % magenta
+    for i = interval
+        k = k + 1;
+        c(k,:) = [i 0 i];
+    end
+    for i = interval
+        k = k + 1;
+        c(k,:) = [255 i 255];
+    end
+    
+end
+
+rgb = c;
+
+end
+
+function rgb = prep_rgb_max_chroma
+% largest chroma
+interval_step = 15;
+interval = 0:interval_step:255-interval_step;
+interval_rev = 255:-interval_step:0+interval_step;
+
+c = zeros(255/15,3);
+k = 0;
+
+for i = interval
+    k = k + 1;
+    c(k,:) = [255 i 0];
+end
+for i = interval_rev
+    k = k + 1;
+    c(k,:) = [i 255 0];
+end
+for i = interval
+    k = k + 1;
+    c(k,:) = [0 255 i];
+end
+for i = interval_rev
+    k = k + 1;
+    c(k,:) = [0 i 255];
+end
+for i = interval
+    k = k + 1;
+    c(k,:) = [i 0 255];
+end
+for i = interval_rev
+    k = k + 1;
+    c(k,:) = [255 0 i];
+end
+
+rgb = c;
+
+end
+
+%% 3D plot
+function plot_color_scale (lab)
+
+% convert to sRGB
+rgb = lab2rgb(lab);
+
+% cropping REPLACE_WITH_DASH_DASH flooring
+rgb = max(rgb,0);
+
+% cropping REPLACE_WITH_DASH_DASH ceiling
+rgb = min(rgb,1);
+
+% scale to [0,255]
+rgb = (double(rgb)*255);
+
+% start plotting
+hold on
+
+%         for k = 1:size(lab,1)
+%             plot3(lab(k,2),lab(k,3),lab(k,1),'o',...
+%                 'MarkerFaceColor',rgb(k,:)/255,...
+%                 'MarkerEdgeColor',[0 0 0],...
+%                 'MarkerSize',5)
+
+
+show_max_chroma(lab,rgb)
+
+grid on
+
+%axis([-100 100 -100 100 0 100])
+% axis square
+xlabel('CIELAB a*')
+ylabel('CIELAB b*')
+zlabel('CIELAB L*')
+
+%saveas(gcf,'t3.png')
+
+end
+
+%% Show color patches using balls
+% lab: input as CIELAB
+% rgb: for coloring
+function show_as_balls (lab,rgb)
+% show balls
+for k = 1:size(lab,1)
+    
+    plot3(lab(k,2),lab(k,3),lab(k,1),'o',...
+        'MarkerFaceColor',rgb(k,:)/255,...
+        'MarkerEdgeColor',rgb(k,:)/255,...
+        'MarkerSize',15)
+    
+    if 1
+        % add text labels
+        step = k-1;
+        txt = sprintf('#%d',step);
+        text(lab(k,2)+10,lab(k,3),lab(k,1),txt)
+    end
+    
+end
+
+end
+
+%% Show color patches using lines
+% lab: input as CIELAB
+% rgb: for coloring
+function show_as_lines (lab,rgb)
+
+% for each line interval
+for k = 1:size(lab,1)-1
+    
+    plot3(lab(k:k+1,2),lab(k:k+1,3),lab(k:k+1,1),'-',...
+        'Color',rgb(k,:)/255)
+    
+end
+
+end
+
+%% Calculate dE between all colors in CIELAB
+% lab is a K*3 matrix
+function dE_allpair = dE_all (lab)
+
+len = size(lab,1);
+dE_allpair = zeros(len,len);
+for k = 1:len
+    for j = 1:len
+        lab1 = lab(k,:);
+        lab2 = lab(j,:);
+        dE = sum((lab1-lab2).^2).^0.5;
+        dE_allpair(k,j) = dE;
+    end
+end
+
+end
+
+%% Calculate dE between two colors in CIELAB
+function dE = color_difference (lab1, lab2)
+
+dE = sum((lab1-lab2).^2).^0.5;
+
+end
+
+##### SOURCE END #####
+--></body></html>
