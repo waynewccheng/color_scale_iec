@@ -1,5 +1,6 @@
 %% Color Belt
-%  Q: how many dE on the color belt?
+%  Q: What are the colors with the most chroma in the sRGB colro space?
+%  A: color belt
 %  6/26/2019
 
 classdef ColorBeltClass < handle
