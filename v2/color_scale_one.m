@@ -1,5 +1,6 @@
 % Q: visualize the color scale proposed by IEC MT41
 %
+% 9-3-2019: address minor changes requested by Kevin
 
 function color_scale (country)
 % proposed RGB
@@ -121,6 +122,45 @@ WCC = [
 0 133 255;
 255 0 226;
 255 255 255];
+
+
+
+% sunkist: middle between red and yellow
+US0 = [
+    0 0 0; % black
+    128   0 128; % purple
+    0 0 255; % blue
+    0 128   0; % green
+    255 255   0; % yellow
+    255 159   0; % orange    
+    255 0 0; % red
+    255 0 0; % red
+    ];
+
+% gold: reduce lightness
+US1 = [
+    0 0 0; % black
+    128   0 128; % purple
+    0 0 255; % blue
+    0 128   0; % green
+    255 255   0; % yellow
+    170 123 0; % gold    
+    255 0 0; % red
+    255 0 0; % red
+    ];
+
+% salmon: reduce chroma
+US2 = [
+    0 0 0; % black
+    128   0 128; % purple
+    0 0 255; % blue
+    0 128   0; % green
+    255 255   0; % yellow
+    255 192 151; % salmon    
+    255 0 0; % red
+    255 0 0; % red
+    ];
+
 
 if 0
 %% WCC design
