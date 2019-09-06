@@ -1,0 +1,47 @@
+Sub MyBar()
+'
+' Macro3 Macro
+'
+
+'
+    ActiveSheet.ChartObjects(1).Activate
+    
+    For pnt = 1 To 9
+    
+    ' ActiveChart.SeriesCollection(ser).Select
+    
+    For ser = 1 To 8
+    
+        rng = Range(Cells(2, 8 + 3 * pnt), Cells(9, 8 + 3 * pnt + 2))
+        
+        Call DoPoint(ser, pnt, rng)
+    
+    Next
+    
+    Next
+   
+End Sub
+
+Sub DoPoint(ser, pnt, rng)
+    
+    ActiveChart.SeriesCollection(ser).Points(pnt).Select
+    
+    r = rng(ser, 1)
+    g = rng(ser, 2)
+    b = rng(ser, 3)
+    
+    Call DrawColor(r, g, b)
+
+End Sub
+
+Sub DrawColor(r, g, b)
+    
+    With Selection.Format.Fill
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(r, g, b)
+        .Transparency = 0
+        .Solid
+    End With
+
+End Sub
+
